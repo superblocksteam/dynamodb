@@ -8,7 +8,7 @@ import {
   RawRequest,
   TableType
 } from '@superblocksteam/shared';
-import { BasePlugin, PluginExecutionProps, safeJSONParse } from '@superblocksteam/shared-backend';
+import { BasePlugin, PluginExecutionProps, safeJSONParse, getAwsClientConfig } from '@superblocksteam/shared-backend';
 import { AWSError, DynamoDB } from 'aws-sdk';
 
 export default class DynamoDBPlugin extends BasePlugin {
@@ -63,14 +63,8 @@ export default class DynamoDBPlugin extends BasePlugin {
   }
 
   private getDynamoDBClient(datasourceConfig: DynamoDBDatasourceConfiguration): DynamoDB {
-    const awsConfig = {
-      region: datasourceConfig.authentication?.custom?.region?.value,
-      accessKeyId: datasourceConfig.authentication?.custom?.accessKeyID?.value,
-      secretAccessKey: datasourceConfig.authentication?.custom?.secretKey?.value
-    };
-
-    const dynamoDBClient = new DynamoDB(awsConfig);
-    return dynamoDBClient;
+    const dynamoDb = new DynamoDB(getAwsClientConfig(datasourceConfig));
+    return dynamoDb;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
