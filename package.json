@@ -1,6 +1,6 @@
 {
   "name": "@superblocksteam/dynamodb",
-  "version": "0.1786.0",
+  "version": "0.1859.0",
   "description": "Superblocks DynamoDB Plugin",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -26,7 +26,6 @@
     "@superblocksteam/shared": "^0.x",
     "@superblocksteam/shared-backend": "^0.x",
     "aws-sdk": "2.1084.0",
-    "deasync": "0.1.26",
     "minimist": "1.2.6"
   },
   "devDependencies": {
