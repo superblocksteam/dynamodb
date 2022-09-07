@@ -36,7 +36,7 @@ export default class DynamoDBPlugin extends BasePlugin {
   }
 
   getRequest(actionConfiguration: DynamoDBActionConfiguration): RawRequest {
-    const actionDisplayName = camelCaseToDisplay(actionConfiguration.action);
+    const actionDisplayName = camelCaseToDisplay(actionConfiguration.action ?? '');
     return `Action: ${actionDisplayName}\n\nParams:\n${actionConfiguration.body}`;
   }
 
