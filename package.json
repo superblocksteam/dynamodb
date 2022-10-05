@@ -1,6 +1,6 @@
 {
   "name": "@superblocksteam/dynamodb",
-  "version": "0.2126.0",
+  "version": "0.2221.0",
   "description": "Superblocks DynamoDB Plugin",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -14,7 +14,7 @@
     "npm": "^8.3.1"
   },
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && npx swc src -d dist",
     "clean": "rimraf ./dist *tsbuildinfo",
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
@@ -29,6 +29,8 @@
     "minimist": "1.2.6"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.242",
     "@types/jest": "26.0.24",
     "@types/node": "14.14.22",
     "@typescript-eslint/eslint-plugin": "4.19.0",

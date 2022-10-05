@@ -8,19 +8,21 @@ import {
   RawRequest,
   TableType
 } from '@superblocksteam/shared';
-import { BasePlugin, PluginExecutionProps, safeJSONParse, getAwsClientConfig } from '@superblocksteam/shared-backend';
+import { DatabasePlugin, PluginExecutionProps, safeJSONParse, getAwsClientConfig, CreateConnection } from '@superblocksteam/shared-backend';
 import { AWSError, DynamoDB } from 'aws-sdk';
 
-export default class DynamoDBPlugin extends BasePlugin {
+export default class DynamoDBPlugin extends DatabasePlugin {
   async execute({
     context,
     datasourceConfiguration,
     actionConfiguration
   }: PluginExecutionProps<DynamoDBDatasourceConfiguration>): Promise<ExecutionOutput> {
+    const ret = new ExecutionOutput();
     try {
-      const ret = new ExecutionOutput();
-      const dynamoDBClient = this.getDynamoDBClient(datasourceConfiguration);
-      ret.output = await this.runAction(dynamoDBClient, actionConfiguration.action, actionConfiguration.body);
+      const dynamoDBClient = await this.createConnection(datasourceConfiguration);
+      ret.output = await this.executeQuery(() => {
+        return this.runAction(dynamoDBClient, actionConfiguration.action, actionConfiguration.body);
+      });
       return ret;
     } catch (err) {
       throw new IntegrationError(`DynamoDB request failed, ${err.message}`);
@@ -41,9 +43,11 @@ export default class DynamoDBPlugin extends BasePlugin {
   }
 
   async metadata(datasourceConfiguration: DynamoDBDatasourceConfiguration): Promise<DatasourceMetadataDto> {
+    const dynamoDBClient = await this.createConnection(datasourceConfiguration);
     try {
-      const dynamoDBClient = this.getDynamoDBClient(datasourceConfiguration);
-      const data = await dynamoDBClient.listTables().promise();
+      const data = await this.executeQuery(() => {
+        return dynamoDBClient.listTables().promise();
+      });
       const tables =
         data.TableNames?.map((tableName: string) => {
           return {
@@ -62,9 +66,9 @@ export default class DynamoDBPlugin extends BasePlugin {
     }
   }
 
-  private getDynamoDBClient(datasourceConfig: DynamoDBDatasourceConfiguration): DynamoDB {
-    const dynamoDb = new DynamoDB(getAwsClientConfig(datasourceConfig));
-    return dynamoDb;
+  @CreateConnection
+  protected async createConnection(datasourceConfig: DynamoDBDatasourceConfiguration): Promise<DynamoDB> {
+    return new DynamoDB(getAwsClientConfig(datasourceConfig));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,9 +103,12 @@ export default class DynamoDBPlugin extends BasePlugin {
   }
 
   async test(datasourceConfiguration: DynamoDBDatasourceConfiguration): Promise<void> {
+    let dynamoDBClient: DynamoDB;
     try {
-      const dynamoDBClient = this.getDynamoDBClient(datasourceConfiguration);
-      await dynamoDBClient.listTables().promise();
+      dynamoDBClient = await this.createConnection(datasourceConfiguration);
+      await this.executeQuery(async () => {
+        return dynamoDBClient.listTables().promise();
+      });
     } catch (err) {
       throw new IntegrationError(`DynamoDB listTables operation failed, ${err.message}`);
     }
