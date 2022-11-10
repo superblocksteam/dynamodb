@@ -12,9 +12,7 @@ import { DatabasePlugin, PluginExecutionProps, safeJSONParse, getAwsClientConfig
 import { AWSError, DynamoDB } from 'aws-sdk';
 
 export default class DynamoDBPlugin extends DatabasePlugin {
-  constructor() {
-    super({ useOrderedParameters: false });
-  }
+  protected readonly useOrderedParameters = false;
 
   async execute({
     context,
